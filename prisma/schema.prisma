@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(cuid())
+  email     String  @unique @db.VarChar(100)
+  name      String? @db.VarChar(100)
+  password  String  @db.VarChar(100)
+  role      String  @default("USER") @db.VarChar(100)
+  transaksis Transaksi[]
+
+  @@map("users")
+}
+
+model Psikolog{
+  id        String  @id @default(cuid())
+  name      String  @db.VarChar(100)
+  keahlian  String  @db.VarChar(100)
+  email     String  @unique @db.VarChar(100)
+
+  schedules  Schedule[]
+  @@map("psikologs")
+}
+
+model Transaksi{
+  id        String  @id @default(cuid())
+  status    String  @default("PENDING") @db.VarChar(100)
+  tanggal   DateTime @default(now()) @db.DateTime(6)
+  user_id   String  @default(cuid())
+  psikolog_id String  @default(cuid())
+  user      User    @relation(fields: [user_id], references: [id])
+
+  @@map("transaksis")
+}
+
+model Schedule{
+  id        String  @id @default(cuid())
+  psikolog_id String  @default(cuid())
+  jam_mulai DateTime @db.DateTime(6)
+  jam_selesai DateTime @db.DateTime(6)
+  psikolog  Psikolog @relation(fields: [psikolog_id], references: [id])
+
+  @@map("schedules")
+}
